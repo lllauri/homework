@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link href="../_build/app.css" rel="stylesheet" />
+    <script defer src="../_build/app.js"></script>
+  </head>
+
+  <body>
+    <div
+      x-data="vehicleData"
+      class="grid grid-cols-1 gap-1 p-4 xl:grid-cols-3 bg-base-200"
+    >
+      <div class="max-w-md">
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text">API key</span>
+          </label>
+          <div class="relative">
+            <input
+              type="text"
+              name="apiKey"
+              x-model="apiKey"
+              placeholder="Insert API key here"
+              @keyup.enter="fetchVehicles"
+              class="w-full pr-16 input input-primary input-bordered"
+            />
+
+            <button
+              type="submit"
+              @click="fetchVehicles"
+              class="absolute top-0 right-0 rounded-l-none btn btn-primary"
+              :class="[vehicleLoading || apiKey == '' ? 'opacity-50 cursor-not-allowed' : 'hover:btn-secondary']"
+              :disabled="vehicleLoading"
+              disabled="disabled"
+            >
+              go
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="xl:col-span-3 col-span-1 divider"></div>
+
+      <div class="card col-start-1 row-start-3 compact bg-base-100">
+        <div class="card-body overflow-x-auto">
+          <table class="table w-full">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Speed</th>
+                <th>Last update</th>
+              </tr>
+            </thead>
+
+            <template x-for="vehicleObj in vehicles" :key="vehicleObj.objectId">
+              <tr
+                @click="toggleVehicle(vehicleObj.objectId)"
+                :class="isActive == vehicleObj.objectId ? 'active' : 'hover:bg-base-200'"
+              >
+                <th x-text="vehicleObj.objectName"></th>
+                <th x-text="vehicleObj.speed"></th>
+                <th x-text="showTimeAgo(vehicleObj.lastEngineOnTime)"></th>
+              </tr>
+            </template>
+          </table>
+        </div>
+      </div>
+
+      <div
+        x-data="mapData"
+        class="card col-start-1 compact bg-base-100"
+      >
+        <!-- x-init="$watch('vehicles', vehicles => drawVehicleMarkers(vehicles))" -->
+        <div
+          class="card-body overflow-x-auto"
+        >
+          <!-- x-init="$watch('isActive', vehicleId => focusVehicleMarker(vehicleId))" -->
+          <div class="form-control">
+            <div class="flex space-x-2">
+              <input
+                type="date"
+                x-model="selectedDate"
+                class="w-full input input-primary input-bordered"
+              />
+              <button
+                type="submit"
+                @click="fetchVehicleData(isActive, selectedDate)"
+                :class="isActive == '' || selectedDate == '' ? 'opacity-50 cursor-not-allowed' : 'hover:btn-secondary'"
+                :disabled="mapLoading"
+                disabled="disabled"
+                class="btn btn-primary"
+              >
+                go
+              </button>
+            </div>
+            <label class="label">
+              <span class="label-text">Date</span>
+            </label>
+          </div>
+
+          <table class="table w-full">
+            <tr>
+              <th>Total distance</th>
+              <template x-if="totalDistance">
+                <th x-text="totalDistance"></th>
+              </template>
+            </tr>
+
+            <tr>
+              <th>Number of stops</th>
+              <template x-if="stops">
+                <th x-text="stops"></th>
+              </template>
+            </tr>
+
+            <tr>
+              <th>Shortes possible distance</th>
+              <template x-if="shortestDistance">
+                <th x-text="shortestDistance"></th>
+              </template>
+            </tr>
+          </table>
+        </div>
+      </div>
+
+      <div
+        class="card row-start-3 col-start-2 col-end-auto xl:col-span-2 col-span-1 bg-base-100 h-[32rem]"
+      >
+        <div class="min-h-full min-w-full" id="map"></div>
+      </div>
+    </div>
+  </body>
+</html>

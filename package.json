@@ -1,0 +1,25 @@
+{
+  "name": "homework",
+  "version": "1.0.0",
+  "description": "Homework project for Fleet Complete",
+  "main": "src/app.js",
+  "dependencies": {
+    "@googlemaps/js-api-loader": "^1.13.2",
+    "alpinejs": "^3.8.1",
+    "esbuild": "^0.14.14",
+    "javascript-time-ago": "^2.3.11",
+    "luxon": "^2.3.0"
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.4.2",
+    "daisyui": "^1.25.4",
+    "postcss": "^8.4.5",
+    "tailwindcss": "^3.0.18"
+  },
+  "scripts": {
+    "watch": "npx esbuild src/app.js --bundle --watch  --outdir=_build/",
+    "build": "npx esbuild src/app.js --bundle --minify  --outdir=_build/",
+    "watch-css": "npx tailwindcss --input src/app.css --output=_build/app.css --watch",
+    "build-css": "NODE_ENV=production tailwindcss --postcss --minify --input=src/app.css --output=_build/app.css"
+  }
+}
