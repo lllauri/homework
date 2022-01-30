@@ -16,9 +16,9 @@
     "tailwindcss": "^3.0.18"
   },
   "scripts": {
-    "watch": "npx esbuild src/app.js --bundle --watch  --outdir=_build/",
-    "build": "npx esbuild src/app.js --bundle --minify  --outdir=_build/",
-    "watch-css": "npx tailwindcss --input src/app.css --output=_build/app.css --watch",
-    "build-css": "NODE_ENV=production tailwindcss --postcss --minify --input=src/app.css --output=_build/app.css"
+    "watch": "npx esbuild src/app.js --bundle --watch  --outdir=assets/",
+    "build": "npx esbuild src/app.js --bundle --minify  --outdir=assets/",
+    "watch-css": "npx tailwindcss --input src/app.css --output=assets/app.css --watch",
+    "build-css": "NODE_ENV=production tailwindcss --postcss --minify --input=src/app.css --output=assets/app.css"
   }
 }
