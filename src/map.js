@@ -1,5 +1,6 @@
 import { Loader } from "@googlemaps/js-api-loader";
 import { DateTime } from "luxon";
+import config from "./config.js";
 
 export default () => ({
   markers: [],
@@ -14,7 +15,7 @@ export default () => ({
   shortestDistance: false,
 
   init() {
-    const GOOGLE_API_KEY = ***REMOVED***;
+    const GOOGLE_API_KEY = config.GOOGLE_API_KEY;
     const loader = new Loader({ apiKey: GOOGLE_API_KEY });
 
     loader.load().then(function (google) {
