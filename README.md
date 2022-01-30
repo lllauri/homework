@@ -1,3 +1,5 @@
 # Homework for Fleet Complete
 
-Needs a src/config.js file to work properly
+To build:
+    npm run build && npm run build-css
+

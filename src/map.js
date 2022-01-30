@@ -1,6 +1,5 @@
 import { Loader } from "@googlemaps/js-api-loader";
 import { DateTime } from "luxon";
-import config from "./config.js";
 
 export default () => ({
   markers: [],
@@ -15,8 +14,8 @@ export default () => ({
   shortestDistance: false,
 
   init() {
-    const GOOGLE_API_KEY = config.GOOGLE_API_KEY;
-    const loader = new Loader({ apiKey: GOOGLE_API_KEY });
+    const GOOGLE_API_KEY = "QUl6YVN5Q0MtMlhvWE1WRE9Eam1JS2EzU09fOU1YbDFMSmpVZ0c4";
+    const loader = new Loader({ apiKey: atob(GOOGLE_API_KEY) });
 
     loader.load().then(function (google) {
       türi = { lat: 58.802, lng: 25.424 };
