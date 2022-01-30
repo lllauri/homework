@@ -1,5 +1,3 @@
-import TimeAgo from "javascript-time-ago";
-import en from "javascript-time-ago/locale/en.json";
 import { DateTime } from "luxon";
 
 export default () => ({
@@ -8,13 +6,7 @@ export default () => ({
   vehicles: [],
   isActive: "",
   selectedDate: "",
-  timeAgo: null,
   //home.assignment-699172
-
-  init() {
-    TimeAgo.addDefaultLocale(en);
-    this.timeAgo = new TimeAgo("en-US");
-  },
 
   fetchVehicles() {
     this.vehicleLoading = true;
