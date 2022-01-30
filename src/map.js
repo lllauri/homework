@@ -30,11 +30,15 @@ export default () => ({
 
   setActiveVehicleData(data) {
     this.activeVehicleData = data;
-    this.setPolyLine();
     this.setTotalDistance();
-    const startsAndStops = this.getStartsAndStops();
-    this.setStops(startsAndStops.stops.length);
-    this.setShortestDistance(startsAndStops);
+
+    if (data.length > 0) {
+      this.setPolyLine();
+      const startsAndStops = this.getStartsAndStops();
+
+      this.setStops(startsAndStops.stops.length);
+      this.setShortestDistance(startsAndStops);
+    }
   },
 
   setPolyLine() {
@@ -80,7 +84,13 @@ export default () => ({
       distance = (stop[key] - start[key]).toFixed(2);
     }
 
-    distance = distance != "0.00" ? distance + " KM" : "Not reported";
+    distance =
+      distance == null
+        ? "No data"
+        : distance == "0.00"
+        ? "Not reported"
+        : distance + " KM";
+
     this.totalDistance = distance;
   },
 
@@ -142,7 +152,6 @@ export default () => ({
     // Google API limits one request to 10 nodes max
     // we will chunk the stops by 10 with 1 node overlap
     // so the last point of one chunk is the first point of next chunk
-
     const chunk = 10;
 
     let start = startsAndStops.starts[0];
