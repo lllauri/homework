@@ -36,8 +36,10 @@ export default () => ({
       this.setPolyLine();
       const startsAndStops = this.getStartsAndStops();
 
-      this.setStops(startsAndStops.stops.length);
-      this.setShortestDistance(startsAndStops);
+      if (startsAndStops.length > 0) {
+        this.setStops(startsAndStops.stops.length);
+        this.setShortestDistance(startsAndStops);
+      }
     }
   },
 
@@ -158,7 +160,7 @@ export default () => ({
     let stops = startsAndStops.stops;
     stops.unshift(start);
 
-    routes = generateRoutes(stops);
+    routes = generateRoutes(Stops);
 
     return routes;
 
