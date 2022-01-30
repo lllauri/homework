@@ -14,7 +14,8 @@ export default () => ({
   shortestDistance: false,
 
   init() {
-    const GOOGLE_API_KEY = "QUl6YVN5Q0MtMlhvWE1WRE9Eam1JS2EzU09fOU1YbDFMSmpVZ0c4";
+    const GOOGLE_API_KEY =
+      "QUl6YVN5Q0MtMlhvWE1WRE9Eam1JS2EzU09fOU1YbDFMSmpVZ0c4";
     const loader = new Loader({ apiKey: atob(GOOGLE_API_KEY) });
 
     loader.load().then(function (google) {
@@ -79,7 +80,8 @@ export default () => ({
       distance = (stop[key] - start[key]).toFixed(2);
     }
 
-    this.totalDistance = distance != null ? distance + " KM" : null;
+    distance = distance != "0.00" ? distance + " KM" : "Not reported";
+    this.totalDistance = distance;
   },
 
   setStops(stops) {
