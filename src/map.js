@@ -3,10 +3,11 @@ import { DateTime } from "luxon";
 
 export default () => ({
   markers: [],
+  polyLine: null,
   mapLoading: false,
-  polyLine: [],
 
   // data related to path calculations
+  isCalculating: false,
   activeVehicleData: [],
   totalDistance: false,
   stops: false,
@@ -21,7 +22,7 @@ export default () => ({
 
       map = new google.maps.Map(document.getElementById("map"), {
         center: türi,
-        zoom: 7,
+        zoom: 8,
       });
     });
   },
@@ -40,7 +41,7 @@ export default () => ({
 
     this.hideMarkers();
 
-    if (this.polyLine.length > 0) {
+    if (this.polyLine != null) {
       this.deletePolyLine();
     }
 
@@ -58,15 +59,15 @@ export default () => ({
     });
 
     polyLine.setMap(map);
-    this.zoomToObject(polyLine);
+    this.zoomToPolyLine(polyLine);
 
-    this.polyLine.push(polyLine);
+    this.polyLine = polyLine;
   },
 
   setTotalDistance() {
     let start = 0;
     let stop = 0;
-    let distance = false;
+    let distance = null;
 
     if (this.activeVehicleData.length > 0) {
       start = this.activeVehicleData[0];
@@ -78,35 +79,126 @@ export default () => ({
       distance = (stop[key] - start[key]).toFixed(2);
     }
 
-    this.totalDistance = distance ? distance + " KM" : false;
+    this.totalDistance = distance != null ? distance + " KM" : null;
   },
 
   setStops(stops) {
     this.stops = stops;
   },
 
-  setShortestDistance(startsAndStops) {
-    this.deleteMarkers();
+  async setShortestDistance(startsAndStops) {
+    // DEBUG code, doesn't work, need to debug this too
+    // this.deleteMarkers();
 
-    for (const stop of startsAndStops.stops) {
-      const marker = new google.maps.Marker({ stop, map });
-      this.markers.push({ id: 0, marker: marker });
+    // let markers = [];
+
+    // for (stop of startsAndStops.stops) {
+    //   let marker = new google.maps.Marker({ stop, map });
+    //   markers.push({ id: 0, marker: marker });
+    // }
+
+    // this.markers = markers;
+
+    // this.putMarkersOnMap(map);
+
+    this.shortestDistance = false;
+    this.isCalculating = true;
+    const directionsService = new google.maps.DirectionsService();
+    const sleepNow = (delay) =>
+      new Promise((resolve) => setTimeout(resolve, delay));
+
+    let routes = this.divideToRoutes(startsAndStops);
+    let shortestDistance = 0;
+
+    for (const route of routes) {
+      await directionsService
+        .route(route)
+        .then((response) => {
+          const route = response.routes[0];
+          let routeDistance = 0;
+
+          for (const leg of route.legs) {
+            legDistance = leg.distance ? leg.distance.value : 0;
+            routeDistance += legDistance;
+          }
+
+          routeDistance = routeDistance / 1000;
+          shortestDistance += routeDistance;
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+
+      await sleepNow(500);
     }
 
-    this.putMarkersOnMap(map);
+    this.isCalculating = false;
+    this.shortestDistance = shortestDistance.toFixed(2) + " KM";
+  },
+
+  divideToRoutes(startsAndStops) {
+    // Google API limits one request to 10 nodes max
+    // we will chunk the stops by 10 with 1 node overlap
+    // so the last point of one chunk is the first point of next chunk
+
+    const chunk = 10;
+
+    let start = startsAndStops.starts[0];
+    let stops = startsAndStops.stops;
+    stops.unshift(start);
+
+    routes = generateRoutes(stops);
+
+    return routes;
+
+    function generateRoutes(stopsArray) {
+      let routes = [];
+
+      for (let i = 0; i < stopsArray.length; i += chunk - 1) {
+        let chunkArray = stopsArray.slice(i, i + chunk);
+
+        let chunkStart = new google.maps.LatLng(chunkArray[0]);
+        let chunkEnd = new google.maps.LatLng(
+          chunkArray[chunkArray.length - 1]
+        );
+        let waypoints = [];
+
+        for (let i = 1; i < chunkArray.length - 1; i++) {
+          let point = new google.maps.LatLng(chunkArray[i]);
+          let waypoint = { location: point, stopover: true };
+
+          waypoints.push(waypoint);
+        }
+
+        routes.push({
+          origin: chunkStart,
+          destination: chunkEnd,
+          waypoints: waypoints,
+          travelMode: google.maps.TravelMode.DRIVING,
+        });
+      }
+
+      return routes;
+    }
   },
 
   getStartsAndStops() {
     const activeVehicleData = this.activeVehicleData;
 
-    // acc {stops: [{Lat: Lng: }, .. ], starts: [{Lat: , Lng: }]
+    // acc {stops: [{lat: Lng: }, .. ], starts: [{lat: , Lng: }]
     const reducer = (acc, current) => {
-      if (acc.starts.length == acc.stops.length && current.Speed != null) {
-        acc.starts.push({ Lat: current.Latitude, Lng: current.Longitude });
+      if (
+        acc.starts.length == acc.stops.length &&
+        ![0, null].includes(current.Speed)
+      ) {
+        acc.starts.push({ lat: current.Latitude, lng: current.Longitude });
       }
 
-      if (acc.starts.length > acc.stops.length && [0, null].includes(current.Speed)) {
-        acc.stops.push({ Lat: current.Latitude, Lng: current.Longitude });
+      if (
+        acc.starts.length > acc.stops.length &&
+        [0, null].includes(current.Speed)
+      ) {
+        acc.stops.push({ lat: current.Latitude, lng: current.Longitude });
       }
 
       return acc;
@@ -116,9 +208,6 @@ export default () => ({
       starts: [],
       stops: [],
     });
-    // maybe need additional filter if two consecutive stops are really close together
-
-    console.log(startsAndStops);
 
     return startsAndStops;
   },
@@ -151,42 +240,52 @@ export default () => ({
       });
   },
 
-  putMarkersOnMap(map) {
-    for (markerInfo of this.markers) {
-      console.log("Setting marker to map", markerInfo.id, map);
-      markerInfo.marker.setMap(map);
-    }
-  },
-
   drawVehicleMarkers(vehicles) {
+    let markers = [];
+
     for (const vehicleObj of vehicles) {
       const position = { lat: vehicleObj.latitude, lng: vehicleObj.longitude };
-      const marker = new google.maps.Marker({ position, map });
-      this.markers.push({ id: vehicleObj.objectId, marker: marker });
+      let marker = new google.maps.Marker({ position, map });
+      markers.push({ id: vehicleObj.objectId, marker: marker });
     }
 
+    this.markers = markers;
     this.putMarkersOnMap(map);
   },
 
   focusVehicleMarker(vehicleId) {
-    for (markerInfo of this.markers) {
+    for (const markerInfo of this.markers) {
       if (vehicleId != "" && vehicleId == markerInfo.id) {
         map.panTo(markerInfo.marker.getPosition());
       }
     }
   },
 
-  zoomToObject(obj) {
+  zoomToPolyLine(polyLine) {
     let bounds = new google.maps.LatLngBounds();
-    const points = obj.getPath().getArray();
-    for (let n = 0; n < points.length; n++) {
-      bounds.extend(points[n]);
+    const points = polyLine.getPath().getArray();
+    for (point of points) {
+      bounds.extend(point);
     }
     map.fitBounds(bounds);
   },
 
+  putMarkersOnMap(mapObj) {
+    for (let i; i < this.markers.length; i++) {
+      // console.log("Setting marker to map", markerInfo.id, map);
+      this.markers[i].marker.setMap(mapObj);
+    }
+  },
+
   hideMarkers() {
     this.putMarkersOnMap(null);
+  },
+
+  hidePolyLine() {
+    // does not work
+    // console.log("hide polyLine");
+    // console.log(this.polyLine);
+    this.polyLine.setMap(null);
   },
 
   deleteMarkers() {
@@ -194,16 +293,8 @@ export default () => ({
     this.markers = [];
   },
 
-  hidePolyLine() {
-    console.log("hide polyLine");
-    console.log(this.polyLine);
-    for (line of this.polyLine) {
-      line.setMap(null);
-    }
-  },
-
   deletePolyLine() {
     this.hidePolyLine();
-    this.polyLine = [];
+    this.polyLine = null;
   },
 });

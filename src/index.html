@@ -117,6 +117,9 @@
 
             <tr>
               <th>Shortes possible distance</th>
+              <template x-if="isCalculating">
+                <button class="btn btn-ghost btn-circle loading"></button>
+              </template>
               <template x-if="shortestDistance">
                 <th x-text="shortestDistance"></th>
               </template>
