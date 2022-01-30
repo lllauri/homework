@@ -1,12 +1,11 @@
 import { DateTime } from "luxon";
 
 export default () => ({
-  apiKey: "home.assignment-699172",
+  apiKey: "",
   vehicleLoading: false,
   vehicles: [],
   isActive: "",
   selectedDate: "",
-  //home.assignment-699172
 
   fetchVehicles() {
     this.vehicleLoading = true;
