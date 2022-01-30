@@ -282,7 +282,6 @@ export default () => ({
 
   putMarkersOnMap(mapObj) {
     for (let i = 0; i < this.markers.length; i++) {
-      // console.log("Setting marker to map", markerInfo.id, map);
       if (mapObj == null) {
         this.markers[i].marker.setPosition(null);
       }
@@ -296,8 +295,6 @@ export default () => ({
 
   hidePolyLine() {
     // does not work
-    // console.log("hide polyLine");
-    // console.log(this.polyLine);
     this.polyLine.setMap(null);
   },
 
