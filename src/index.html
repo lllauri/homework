@@ -10,9 +10,9 @@
   <body>
     <div
       x-data="vehicleData"
-      class="grid grid-cols-1 gap-1 p-4 xl:grid-cols-3 bg-base-200"
+      class="grid grid-cols-1 gap-1 p-4 lg:grid-cols-3 bg-base-200 h-full"
     >
-      <div class="max-w-md">
+      <div class="max-w-md pl-4">
         <div class="form-control">
           <label class="label">
             <span class="label-text">API key</span>
@@ -41,7 +41,7 @@
         </div>
       </div>
 
-      <div class="xl:col-span-3 col-span-1 divider"></div>
+      <div class="lg:col-span-3 col-span-1 divider"></div>
 
       <div class="card col-start-1 row-start-3 compact bg-base-100">
         <div class="card-body overflow-x-auto">
@@ -70,19 +70,19 @@
 
       <div
         x-data="mapData"
-        class="card col-start-1 compact bg-base-100"
+        x-init="$watch('vehicles', vehicles => drawVehicleMarkers(vehicles))"
+        class="card col-start-1 row-start-4 compact bg-base-100"
       >
-        <!-- x-init="$watch('vehicles', vehicles => drawVehicleMarkers(vehicles))" -->
         <div
+          x-init="$watch('isActive', vehicleId => focusVehicleMarker(vehicleId))"
           class="card-body overflow-x-auto"
         >
-          <!-- x-init="$watch('isActive', vehicleId => focusVehicleMarker(vehicleId))" -->
           <div class="form-control">
-            <div class="flex space-x-2">
+            <div class="relative">
               <input
                 type="date"
                 x-model="selectedDate"
-                class="w-full input input-primary input-bordered"
+                class="w-full pr-16 input input-primary input-bordered"
               />
               <button
                 type="submit"
@@ -90,7 +90,7 @@
                 :class="isActive == '' || selectedDate == '' ? 'opacity-50 cursor-not-allowed' : 'hover:btn-secondary'"
                 :disabled="mapLoading"
                 disabled="disabled"
-                class="btn btn-primary"
+                class="absolute top-0 right-0 rounded-l-none btn btn-primary"
               >
                 go
               </button>
@@ -126,7 +126,7 @@
       </div>
 
       <div
-        class="card row-start-3 col-start-2 col-end-auto xl:col-span-2 col-span-1 bg-base-100 h-[32rem]"
+        class="card row-span-2 row-start-5 lg:row-start-3 lg:col-start-2 lg:col-span-2 col-span-1 bg-base-100 h-[80vh]"
       >
         <div class="min-h-full min-w-full" id="map"></div>
       </div>
