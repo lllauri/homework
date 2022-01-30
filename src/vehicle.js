@@ -15,7 +15,9 @@ export default () => ({
     )
       .then((res) => res.json())
       .then((data) => {
-        this.vehicles = data.response;
+        if (data.response != null) {
+          this.vehicles = data.response;
+        }
         this.vehicleLoading = false;
       })
       .catch((error) => {

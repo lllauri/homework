@@ -36,7 +36,7 @@ export default () => ({
       this.setPolyLine();
       const startsAndStops = this.getStartsAndStops();
 
-      if (startsAndStops.length > 0) {
+      if (startsAndStops.starts.length > 0) {
         this.setStops(startsAndStops.stops.length);
         this.setShortestDistance(startsAndStops);
       }
@@ -160,7 +160,7 @@ export default () => ({
     let stops = startsAndStops.stops;
     stops.unshift(start);
 
-    routes = generateRoutes(Stops);
+    routes = generateRoutes(stops);
 
     return routes;
 
@@ -254,15 +254,12 @@ export default () => ({
   },
 
   drawVehicleMarkers(vehicles) {
-    let markers = [];
-
     for (const vehicleObj of vehicles) {
       const position = { lat: vehicleObj.latitude, lng: vehicleObj.longitude };
       let marker = new google.maps.Marker({ position, map });
-      markers.push({ id: vehicleObj.objectId, marker: marker });
+      this.markers.push({ id: vehicleObj.objectId, marker: marker });
     }
 
-    this.markers = markers;
     this.putMarkersOnMap(map);
   },
 
@@ -284,8 +281,11 @@ export default () => ({
   },
 
   putMarkersOnMap(mapObj) {
-    for (let i; i < this.markers.length; i++) {
+    for (let i = 0; i < this.markers.length; i++) {
       // console.log("Setting marker to map", markerInfo.id, map);
+      if (mapObj == null) {
+        this.markers[i].marker.setPosition(null);
+      }
       this.markers[i].marker.setMap(mapObj);
     }
   },
